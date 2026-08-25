@@ -152,9 +152,11 @@ app.get('/api/files', requireLogin, (req, res) => {
   const name = req.query.name;
   if (!name) return res.status(400).json({ message: 'name parametresi gerekli' });
 
-  const filePath = path.join(STORAGE_DIR, name);
-
-  fs.readFile(filePath, 'utf8', (err, data) => {
+  const target = path.resolve(STORAGE_DIR, name);
+  if (target !== STORAGE_DIR && !target.startsWith(STORAGE_DIR + path.sep)) {
+    return res.status(400).json({ message: 'Gecersiz dosya adi' });
+  }
+  fs.readFile(target, 'utf8', (err, data) => {
     if (err) {
       return res.status(404).json({ message: 'Dosya okunamadi', detail: err.message });
     }
