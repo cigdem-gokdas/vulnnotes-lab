@@ -115,6 +115,9 @@ app.get('/api/users/:id', requireLogin, (req, res) => {
 app.get('/api/notes/:id', requireLogin, (req, res) => {
   const note = db.prepare('SELECT * FROM notes WHERE id = ?').get(Number(req.params.id));
   if (!note) return res.status(404).json({ message: 'Not bulunamadi' });
+  if (note.user_id !== req.user.id && req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Bu nota erisim yetkiniz yok' });
+  }
   res.json(note);
 });
 
@@ -168,14 +171,15 @@ app.post('/api/admin/backup', requireLogin, (req, res) => {
 
   if (!fs.existsSync(BACKUP_DIR)) fs.mkdirSync(BACKUP_DIR);
 
-  const command = `tar -czf ${BACKUP_DIR}/${name}.tar.gz ${STORAGE_DIR}`;
-
-  exec(command, (err, stdout, stderr) => {
-    if (err) {
-      return res.status(500).json({ message: 'Yedekleme basarisiz', detail: stderr });
-    }
-    res.json({ message: 'Yedek olusturuldu', file: `${name}.tar.gz`, output: stdout });
-  });
+  const { execFile } = require('node:child_process');
+  // shell yok: argümanlar programa doğrudan geçer, metakarakter yorumlanmaz
+  execFile('tar', ['-czf', path.join(BACKUP_DIR, safeName + '.tar.gz'), STORAGE_DIR],
+    (err, stdout) => {
+      if (err) {
+        return res.status(500).json({ message: 'Yedekleme basarisiz', detail: stderr });
+      }
+      res.json({ message: 'Yedek olusturuldu', file: `${name}.tar.gz`, output: stdout });
+    });
 });
 
 app.get('/api/admin/users', requireLogin, (req, res) => {
