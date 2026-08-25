@@ -9,9 +9,11 @@ const DB_PATH = path.join(__dirname, 'vulnnotes.db');
 const db = new DatabaseSync(DB_PATH);
 
 // Parolalar tuzsuz SHA-1 ile saklaniyor.
-function legacyHash(password) {
-  return crypto.createHash('sha1').update(password).digest('hex');
-}
+const argon2 = require('argon2');
+const hash = await argon2.hash(password,
+  { type: argon2.argon2id, memoryCost: 19456, timeCost: 2, parallelism: 1 });
+// doğrulama:
+const ok = await argon2.verify(storedHash, password);
 
 function reset() {
   db.exec(`
