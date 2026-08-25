@@ -1,9 +1,11 @@
 <!doctype html>
 <html lang="tr">
+
 <head>
   <meta charset="utf-8">
   <title>VulnNotes - Yorumlar</title>
 </head>
+
 <body>
   <h1>Yorumlar</h1>
 
@@ -17,9 +19,37 @@
 
   <% comments.forEach(function (c) { %>
     <div class="comment">
-      <strong><%= c.author %></strong>
-      <p><%- c.body %></p>
+      <!doctype html>
+      <html lang="tr">
+
+      <head>
+        <meta charset="utf-8">
+        <title>VulnNotes - Yorumlar</title>
+      </head>
+
+      <body>
+        <h1>Yorumlar</h1>
+
+        <form method="POST" action="/api/comments">
+          <input name="author" placeholder="Adiniz" required>
+          <textarea name="body" placeholder="Yorumunuz" required></textarea>
+          <button type="submit">Gonder</button>
+        </form>
+
+        <hr>
+
+        <% comments.forEach(function (c) { %>
+          <div class="comment">
+            <p>
+              <%= c.body %>
+            </p>
+          </div>
+          <% }); %>
+      </body>
+
+      </html>
     </div>
-  <% }); %>
+    <% }); %>
 </body>
+
 </html>
